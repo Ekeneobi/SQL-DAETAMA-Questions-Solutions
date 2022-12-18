@@ -1,0 +1,48 @@
+73.
+Which user worked in more than two distinct companies? 
+Note that some users may have returned to the same job. Output the email address of these users in the ascending order.
+
+
+Tables:
+
+linkedin_emp_history	
+user_id	bigint
+employment	text
+start_date	text
+end_date	text
+
+linkedin_users	
+user_id	bigint
+first_name	text
+last_name	text
+email	text
+country	text
+joined_dt	text
+account_type	text
+
+Walk Through:
+Here I joined the tables using user_id , use windows function dense rank to group the employment company of users and select users that have more than 2 companies.
+
+My solution:
+[
+WITH new_table AS
+(
+SELECT distinct(email), employment, dense_rank() over(partition by email order by employment) row_num
+FROM linkedin_emp_history
+LEFT JOIN linkedin_users USING(user_id)
+)
+SELECT email
+FROM new_table
+WHERE row_num > 2;
+]
+
+Optimal Solution:
+[
+SELECT email
+FROM linkedin_emp_history
+JOIN linkedin_users
+USING(user_id)
+GROUP BY email
+HAVING count(distinct employment) > 2
+ORDER BY emil;
+]
