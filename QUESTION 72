@@ -1,0 +1,25 @@
+72.
+Days since a users first session?
+Calculate the number of days since a users first session. Assume today is 2022-05-26. Return answers sorted by days desc and user_id asc.
+
+Table :
+ig_user_sessions	
+session_ts	datetime
+session_type	text
+user_id	bigint
+
+Walt Through :
+The solution to this problem will involve using windows functions date and rank . Date to find the difference between dates, rank to split the sessions order ascending so that the earliest date is giving rank 1.
+
+solution:
+[
+WITH new_table AS
+(
+SELECT user_id,date(session_ts) date, rank() over(partition by user_id order by session_ts asc) rnk
+FROM ig_user_sessions
+)
+SELECT user_id, date first_session, datediff('2022-05-26', date) days_since_first_session
+FROM new_table
+WHERE rnk = 1
+ORDER BY 3 DESC, 1 ASC;
+]
