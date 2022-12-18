@@ -1,0 +1,49 @@
+Question 1. Medium
+Creators who published a monetized & non-monetized video? 
+Which creators published a monetized video with less than 20 minutes followed by a 
+non-monetized video with at least 20 minutes? Output the email in the alphabetical order.
+
+Which creators published a monetized video with less than 20 minutes followed by a non-monetized video with at least 20 minutes? Output the email in the alphabetical order.
+
+Source Tables:
+
+youtube_videos	
+video_id	bigint
+is_monetized	bigint
+video_title	text
+video_category	text
+user_id	bigint
+category	text
+published_at	text
+duration	bigint
+
+youtube_users	
+user_id	bigint
+username	text
+first_name	text
+last_name	text
+email	text
+country	text
+signup_dt	text
+
+Solution:
+[
+WITH previous_video AS
+(
+SELECT user_id
+FROM(
+SELECT user_id,
+duration,
+is_monitized,
+LAG(duration) OVER(PARTITION BY user_id ORDER BY published_at) prev_duration,
+LAG(is_monitized) OVER(PARTITION BY user_id ORDER BY published_at) prev_monitized
+FROM youtube_videos
+) q
+WHERE prev_monitized = 1 and prev_duration < 20
+ and is_monetized = 0 and duration >= 20)
+ SELECT email
+ FROM youtube_users
+ JOIN previous_video
+ using(user_id)
+ ORDER BY email;
+]
